@@ -1,27 +1,28 @@
-import {NavigationProp, useIsFocused} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
-import {RefreshControl, ScrollView, Text, View} from 'react-native';
-import {showMessage} from 'react-native-flash-message';
-import {useDispatch} from 'react-redux';
-import authToken from '../../../api/authToken';
-import {GetAllCalls} from '../../../api/user.get';
-import CustomButton from '../../../components/CustomButton';
-import Calltile from '../../../components/Layout/CallTile';
-import Loading from '../../../components/Loading';
-import SelectInput from '../../../components/Select';
-import TopHeader from '../../../components/TopHeader';
-import colors from '../../../config/colors';
-import {Screens} from '../../../constants/Screens';
-import {LogoutFun} from '../../../helpers/Logout';
-import {removeJwtToken} from '../../../store/jwt.slice';
+import { NavigationProp, useIsFocused } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { FlatList, RefreshControl, ScrollView, Text, View } from "react-native";
+import { showMessage } from "react-native-flash-message";
+import { useDispatch } from "react-redux";
+import authToken from "../../../api/authToken";
+import { GetAllCalls } from "../../../api/user.get";
+import CustomButton from "../../../components/CustomButton";
+import Calltile from "../../../components/Layout/CallTile";
+import Loading from "../../../components/Loading";
+import SelectInput from "../../../components/Select";
+import TopHeader from "../../../components/TopHeader";
+import colors from "../../../config/colors";
+import { Screens } from "../../../constants/Screens";
+import { LogoutFun } from "../../../helpers/Logout";
+import { removeJwtToken } from "../../../store/jwt.slice";
 
-const Home = ({navigation}: any) => {
+const Home = ({ navigation }: any) => {
   const [isLoading, setloading] = useState(false);
   const [limit, setlimit] = useState(5);
   const [offset, setoffset] = useState(10);
   const [fetchedCalls, setfetchedCalls] = useState([]);
-  const [filter, setfilter] = useState('');
+  const [filter, setfilter] = useState("");
   const [Refreshing, setRefreshing] = useState(false);
+  const [selectedId, setSelectedId] = useState();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -35,13 +36,13 @@ const Home = ({navigation}: any) => {
     } catch (err: any) {
       console.log(err.response?.data);
       if (
-        err?.response?.data?.message == 'Unauthorized' &&
-        err?.response?.data?.statusCode == '401'
+        err?.response?.data?.message == "Unauthorized" &&
+        err?.response?.data?.statusCode == "401"
       ) {
         showMessage({
-          message: 'Logging out ...',
-          description: 'Session Timed out',
-          type: 'danger',
+          message: "Logging out ...",
+          description: "Session Timed out",
+          type: "danger",
         });
         setTimeout(() => {
           handleLogout();
@@ -60,7 +61,7 @@ const Home = ({navigation}: any) => {
   };
   const _handleFilter = async (itemValue: string) => {
     await fetchAllCalls();
-    setfetchedCalls(fetchedCalls?.filter(val => val?.call_type == itemValue));
+    setfetchedCalls(fetchedCalls?.filter((val) => val?.call_type == itemValue));
   };
   //==================REFRESH=================
   const wait = (timeout: number) => {
@@ -73,17 +74,42 @@ const Home = ({navigation}: any) => {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
+  const renderItem = ({ item }: any) => {
+    return (
+      <Calltile
+        key={item?.Id}
+        onPress={() => {
+          setSelectedId(item?.Id);
+          navigation?.navigate(Screens.DetailsScreen, {
+            item: item,
+          });
+        }}
+        call_type={item?.call_type}
+        created_at={item?.created_at}
+        direction={item?.direction}
+        duration={item?.duration}
+        from={item?.from}
+        to={item?.to}
+        is_archived={item?.is_archived}
+        via={item?.via}
+        // id={item?.id}
+        notes={item?.notes}
+      />
+    );
+  };
+
   return isLoading ? (
-    <Loading message={'Fetching Calls'} />
+    <Loading message={"Fetching Calls"} />
   ) : (
-    <View style={{flex: 1, backgroundColor: colors.white}}>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
       <TopHeader />
 
       <ScrollView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         refreshControl={
           <RefreshControl refreshing={Refreshing} onRefresh={onRefresh} />
-        }>
+        }
+      >
         <SelectInput
           value={filter}
           onValueChange={(itemValue: string) => {
@@ -91,26 +117,13 @@ const Home = ({navigation}: any) => {
             setfilter(itemValue);
           }}
         />
-        {fetchedCalls?.map((item: any, index: number) => (
-          <Calltile
-            key={index}
-            onPress={() =>
-              navigation?.navigate(Screens.DetailsScreen, {
-                item: item,
-              })
-            }
-            call_type={item?.call_type}
-            created_at={item?.created_at}
-            direction={item?.direction}
-            duration={item?.duration}
-            from={item?.from}
-            to={item?.to}
-            is_archived={item?.is_archived}
-            via={item?.via}
-            // id={item?.id}
-            notes={item?.notes}
-          />
-        ))}
+        <FlatList
+          data={fetchedCalls}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.Id}
+          extraData={selectedId}
+        />
+
         <CustomButton
           title="Load More"
           onPress={() => setlimit(limit + 5)}
@@ -120,7 +133,7 @@ const Home = ({navigation}: any) => {
           title="LOGOUT"
           onPress={handleLogout}
           variant="ghost"
-          colorScheme={'error'}
+          colorScheme={"error"}
         />
       </ScrollView>
     </View>
