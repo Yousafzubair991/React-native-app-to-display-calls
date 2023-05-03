@@ -8,7 +8,7 @@ interface Props {
   isLoading?: boolean;
   isLoadingText?: string;
   colorScheme?: ColorSchemeType;
-  onPress?: () => {};
+  onPress?: () => void;
   size?: string;
   disabled?: boolean;
   variant?: string;

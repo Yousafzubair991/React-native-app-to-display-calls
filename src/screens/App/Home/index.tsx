@@ -61,7 +61,9 @@ const Home = ({ navigation }: any) => {
   };
   const _handleFilter = async (itemValue: string) => {
     await fetchAllCalls();
-    setfetchedCalls(fetchedCalls?.filter((val) => val?.call_type == itemValue));
+    setfetchedCalls(
+      fetchedCalls?.filter((val: any) => val?.call_type == itemValue)
+    );
   };
   //==================REFRESH=================
   const wait = (timeout: number) => {
@@ -75,11 +77,13 @@ const Home = ({ navigation }: any) => {
   }, []);
 
   const renderItem = ({ item }: any) => {
+    console.log(item);
+
     return (
       <Calltile
         key={item?.Id}
         onPress={() => {
-          setSelectedId(item?.Id);
+          setSelectedId(item?.id);
           navigation?.navigate(Screens.DetailsScreen, {
             item: item,
           });
@@ -103,39 +107,34 @@ const Home = ({ navigation }: any) => {
   ) : (
     <View style={{ flex: 1, backgroundColor: colors.white }}>
       <TopHeader />
-
-      <ScrollView
-        style={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={Refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <SelectInput
-          value={filter}
-          onValueChange={(itemValue: string) => {
-            _handleFilter(itemValue);
-            setfilter(itemValue);
-          }}
-        />
-        <FlatList
-          data={fetchedCalls}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.Id}
-          extraData={selectedId}
-        />
-
-        <CustomButton
-          title="Load More"
-          onPress={() => setlimit(limit + 5)}
-          variant="subtle"
-        />
-        <CustomButton
-          title="LOGOUT"
-          onPress={handleLogout}
-          variant="ghost"
-          colorScheme={"error"}
-        />
-      </ScrollView>
+      <SelectInput
+        value={filter}
+        onValueChange={(itemValue: string) => {
+          _handleFilter(itemValue);
+          setfilter(itemValue);
+        }}
+      />
+      <FlatList
+        data={fetchedCalls}
+        renderItem={renderItem}
+        keyExtractor={(item: any) => item.id}
+        extraData={selectedId}
+        ListFooterComponent={() => (
+          <>
+            <CustomButton
+              title="Load More"
+              onPress={() => setlimit(limit + 5)}
+              variant="subtle"
+            />
+            <CustomButton
+              title="LOGOUT"
+              onPress={handleLogout}
+              variant="ghost"
+              colorScheme={"error"}
+            />
+          </>
+        )}
+      />
     </View>
   );
 };

@@ -1,8 +1,8 @@
-import {Input, Select, View} from 'native-base';
-import React from 'react';
-import {StyleSheet, Text} from 'react-native';
-import colors from '../../config/colors';
-import {RW} from '../../config/style';
+import { Input, Select, View } from "native-base";
+import React from "react";
+import { StyleSheet, Text } from "react-native";
+import colors from "../../config/colors";
+import { RW } from "../../config/style";
 
 interface Props {
   size?: string;
@@ -10,7 +10,7 @@ interface Props {
   variant?: string;
   error?: any;
   value?: string;
-  onValueChange?: (string) => {};
+  onValueChange?: (itemValue: string) => void;
   name?: string;
   secureTextEntery?: boolean;
 }
@@ -24,7 +24,8 @@ function SelectInput(props: Props) {
         placeholder="Choose Filter"
         _selectedItem={{}}
         mt={4}
-        onValueChange={props?.onValueChange}>
+        onValueChange={props?.onValueChange}
+      >
         <Select.Item label="Answered" value="answered" />
         <Select.Item label="Missed" value="missed" />
 
@@ -60,6 +61,6 @@ const styles = StyleSheet.create({
     color: colors.Warning,
     fontSize: 12,
     paddingTop: 4,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 });
